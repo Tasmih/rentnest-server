@@ -58,6 +58,7 @@ model User {
   status    UserStatus @default(ACTIVE)
   properties Property[]
   rentalRequests RentalRequest[]
+  reviews Review[]
 
   isDeleted Boolean    @default(false)
   createdAt DateTime   @default(now())
@@ -115,6 +116,7 @@ model Property {
   landlord User     @relation(fields: [landlordId], references: [id])
   category Category @relation(fields: [categoryId], references: [id])
   rentalRequests RentalRequest[]
+  reviews Review[]
 
   status    PropertyStatus @default(AVAILABLE)
   isDeleted Boolean        @default(false)
@@ -149,4 +151,26 @@ model RentalRequest {
   @@index([propertyId])
   @@index([status])
   @@map("rental_requests")
+}
+
+model Review {
+  id         String       @id @default(uuid())
+  rating     Int
+  comment    String?
+
+  userId     String
+  propertyId String
+
+  user     User     @relation(fields: [userId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id])
+
+  status    ReviewStatus @default(PUBLISHED)
+  isDeleted Boolean      @default(false)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([propertyId])
+  @@index([status])
+  @@map("reviews")
 }
