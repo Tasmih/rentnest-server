@@ -56,6 +56,7 @@ model User {
   phone     String?
   role      UserRole   @default(TENANT)
   status    UserStatus @default(ACTIVE)
+  properties Property[]
 
   isDeleted Boolean    @default(false)
   createdAt DateTime   @default(now())
@@ -72,6 +73,7 @@ model Category {
   name        String         @unique
   description String?
   status      CategoryStatus @default(ACTIVE)
+  properties Property[]
 
   isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -79,4 +81,47 @@ model Category {
 
   @@index([status])
   @@map("categories")
+}
+enum PropertyType {
+  FLAT
+  ROOM
+  SEAT
+  SUBLET
+  HOSTEL
+}
+model Property {
+  id          String         @id @default(uuid())
+  title       String
+  description String
+  rent        Int
+  area        String
+  address     String
+  propertyType PropertyType
+  bedrooms    Int?
+  bathrooms   Int?
+  coverImage  String?
+
+  furnished       Boolean @default(false)
+  parking         Boolean @default(false)
+  lift            Boolean @default(false)
+  bachelorAllowed Boolean @default(true)
+  familyAllowed   Boolean @default(true)
+
+  landlordId String
+  categoryId String
+
+  landlord User     @relation(fields: [landlordId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+
+  status    PropertyStatus @default(AVAILABLE)
+  isDeleted Boolean        @default(false)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([landlordId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([area])
+  @@index([rent])
+  @@map("properties")
 }
