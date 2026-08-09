@@ -57,6 +57,7 @@ model User {
   role      UserRole   @default(TENANT)
   status    UserStatus @default(ACTIVE)
   properties Property[]
+  rentalRequests RentalRequest[]
 
   isDeleted Boolean    @default(false)
   createdAt DateTime   @default(now())
@@ -74,6 +75,7 @@ model Category {
   description String?
   status      CategoryStatus @default(ACTIVE)
   properties Property[]
+  
 
   isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -112,6 +114,7 @@ model Property {
 
   landlord User     @relation(fields: [landlordId], references: [id])
   category Category @relation(fields: [categoryId], references: [id])
+  rentalRequests RentalRequest[]
 
   status    PropertyStatus @default(AVAILABLE)
   isDeleted Boolean        @default(false)
@@ -124,4 +127,26 @@ model Property {
   @@index([area])
   @@index([rent])
   @@map("properties")
+}
+
+model RentalRequest {
+  id         String        @id @default(uuid())
+  moveInDate DateTime?
+  message    String?
+
+  tenantId   String
+  propertyId String
+
+  tenant   User     @relation(fields: [tenantId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id])
+
+  status    RequestStatus @default(PENDING)
+  isDeleted Boolean       @default(false)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([tenantId])
+  @@index([propertyId])
+  @@index([status])
+  @@map("rental_requests")
 }
