@@ -47,3 +47,22 @@ enum ReviewStatus {
   PUBLISHED
   HIDDEN
 }
+
+model User {
+  id        String     @id @default(uuid())
+  name      String
+  email     String     @unique
+  password  String
+  phone     String?
+  role      UserRole   @default(TENANT)
+  status    UserStatus @default(ACTIVE)
+
+  isDeleted Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+  @@map("users")
+}
