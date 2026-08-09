@@ -28,6 +28,13 @@ enum CategoryStatus {
   ACTIVE
   INACTIVE
 }
+enum PropertyType {
+  FLAT
+  ROOM
+  SEAT
+  SUBLET
+  HOSTEL
+}
 
 enum PropertyStatus {
   AVAILABLE
@@ -48,6 +55,11 @@ enum ReviewStatus {
   HIDDEN
 }
 
+enum FavoriteStatus {
+  ACTIVE
+  REMOVED
+}
+
 model User {
   id        String     @id @default(uuid())
   name      String
@@ -59,6 +71,7 @@ model User {
   properties Property[]
   rentalRequests RentalRequest[]
   reviews Review[]
+  favorites Favorite[]
 
   isDeleted Boolean    @default(false)
   createdAt DateTime   @default(now())
@@ -85,13 +98,7 @@ model Category {
   @@index([status])
   @@map("categories")
 }
-enum PropertyType {
-  FLAT
-  ROOM
-  SEAT
-  SUBLET
-  HOSTEL
-}
+
 model Property {
   id          String         @id @default(uuid())
   title       String
@@ -117,6 +124,7 @@ model Property {
   category Category @relation(fields: [categoryId], references: [id])
   rentalRequests RentalRequest[]
   reviews Review[]
+  favorites Favorite[]
 
   status    PropertyStatus @default(AVAILABLE)
   isDeleted Boolean        @default(false)
@@ -173,4 +181,25 @@ model Review {
   @@index([propertyId])
   @@index([status])
   @@map("reviews")
+}
+
+model Favorite {
+  id         String         @id @default(uuid())
+
+  userId     String
+  propertyId String
+
+  user     User     @relation(fields: [userId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id])
+
+  status    FavoriteStatus @default(ACTIVE)
+  isDeleted Boolean        @default(false)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([userId, propertyId])
+  @@index([userId])
+  @@index([propertyId])
+  @@index([status])
+  @@map("favorites")
 }
