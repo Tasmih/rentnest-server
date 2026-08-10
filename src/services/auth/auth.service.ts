@@ -28,6 +28,13 @@ const registerUser = async (payload: TRegisterPayload) => {
     throw new AppError(409, "User already exists with this email");
   }
 
+  if (payload.role === UserRole.ADMIN) {
+  throw new AppError(
+    403,
+    "Admin account cannot be created through public registration"
+  );
+}
+
   const hashedPassword = await bcrypt.hash(payload.password, 12);
 
   const user = await prisma.user.create({

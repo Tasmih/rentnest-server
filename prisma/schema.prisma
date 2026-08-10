@@ -102,43 +102,59 @@ model Category {
 }
 
 model Property {
-  id          String         @id @default(uuid())
-  title       String
-  description String
-  rent        Int
-  area        String
-  address     String
-  propertyType PropertyType
-  bedrooms    Int?
-  bathrooms   Int?
-  coverImage  String?
+id          String         @id @default(uuid())
 
-  furnished       Boolean @default(false)
-  parking         Boolean @default(false)
-  lift            Boolean @default(false)
-  bachelorAllowed Boolean @default(true)
-  familyAllowed   Boolean @default(true)
+title       String
+description String
 
-  landlordId String
-  categoryId String
+rent        Int
+serviceCharge Int @default(0)
+utilityCharge Int @default(0)
 
-  landlord User     @relation(fields: [landlordId], references: [id])
-  category Category @relation(fields: [categoryId], references: [id])
-  rentalRequests RentalRequest[]
-  reviews Review[]
-  favorites Favorite[]
+area        String
+address     String
 
-  status    PropertyStatus @default(AVAILABLE)
-  isDeleted Boolean        @default(false)
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+propertyType PropertyType
 
-  @@index([landlordId])
-  @@index([categoryId])
-  @@index([status])
-  @@index([area])
-  @@index([rent])
-  @@map("properties")
+floor       Int?
+totalFloors Int?
+
+availableFrom DateTime?
+
+bedrooms    Int?
+bathrooms   Int?
+
+coverImage  String?
+
+furnished       Boolean @default(false)
+parking         Boolean @default(false)
+lift            Boolean @default(false)
+bachelorAllowed Boolean @default(true)
+familyAllowed   Boolean @default(true)
+
+landlordId String
+categoryId String
+
+landlord User     @relation(fields: [landlordId], references: [id])
+category Category @relation(fields: [categoryId], references: [id])
+
+rentalRequests RentalRequest[]
+reviews Review[]
+favorites Favorite[]
+
+status    PropertyStatus @default(AVAILABLE)
+isDeleted Boolean        @default(false)
+
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+
+
+@@index([landlordId])
+@@index([categoryId])
+@@index([status])
+@@index([area])
+@@index([rent])
+@@map("properties")
 }
 
 model RentalRequest {

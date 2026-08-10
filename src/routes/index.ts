@@ -4,6 +4,8 @@ import auth from "../middleware/auth";
 import authorize from "../middleware/authorize";
 import { UserRole } from "../generated/prisma/enums";
 import { UserRoutes } from "../services/user/user.route";
+import { CategoryRoutes } from "../services/category/category.route";
+import { PropertyRoutes } from "../services/property/property.route";
 
 const router = Router();
 
@@ -42,5 +44,7 @@ router.get(
 
 router.use("/auth", AuthRoutes);
 router.use("/users", UserRoutes);
+router.use("/categories", CategoryRoutes);
+router.use("/properties", PropertyRoutes);
 
 export default router;
