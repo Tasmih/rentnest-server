@@ -3,6 +3,7 @@ import { AuthRoutes } from "../services/auth/auth.route";
 import auth from "../middleware/auth";
 import authorize from "../middleware/authorize";
 import { UserRole } from "../generated/prisma/enums";
+import { UserRoutes } from "../services/user/user.route";
 
 const router = Router();
 
@@ -40,5 +41,6 @@ router.get(
 );
 
 router.use("/auth", AuthRoutes);
+router.use("/users", UserRoutes);
 
 export default router;
