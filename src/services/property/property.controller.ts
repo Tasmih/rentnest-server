@@ -34,6 +34,7 @@ const createProperty = async (
 };
 
 //get all properties
+//get all properties
 const getAllProperties = async (
   req: Request,
   res: Response,
@@ -41,7 +42,10 @@ const getAllProperties = async (
 ) => {
   try {
 
-    const result = await PropertyService.getAllProperties();
+    const result = await PropertyService.getAllProperties(
+      req.query
+    );
+
 
     sendResponse(res, {
       statusCode: 200,
@@ -49,6 +53,7 @@ const getAllProperties = async (
       message: "Properties retrieved successfully",
       data: result,
     });
+
 
   } catch (error) {
     next(error);

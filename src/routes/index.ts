@@ -6,6 +6,11 @@ import { UserRole } from "../generated/prisma/enums";
 import { UserRoutes } from "../services/user/user.route";
 import { CategoryRoutes } from "../services/category/category.route";
 import { PropertyRoutes } from "../services/property/property.route";
+import { RentalRequestRoutes } from "../services/rentalRequest/rentalRequest.route";
+import { FavoriteRoutes } from "../services/favorite/favorite.route";
+import { ReviewRoutes } from "../services/review/review.route";
+import { DashboardRoutes } from "../services/dashboard/dashboard.route";
+
 
 const router = Router();
 
@@ -42,9 +47,17 @@ router.get(
   }
 );
 
+
+
 router.use("/auth", AuthRoutes);
 router.use("/users", UserRoutes);
 router.use("/categories", CategoryRoutes);
 router.use("/properties", PropertyRoutes);
+router.use("/rental-requests", RentalRequestRoutes);
+router.use("/favorites", FavoriteRoutes);
+router.use("/reviews", ReviewRoutes);
+router.use("/dashboard", DashboardRoutes);
 
 export default router;
+
+
