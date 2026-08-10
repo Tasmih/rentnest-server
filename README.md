@@ -180,7 +180,7 @@ To deploy the backend on **Render**:
 
 - **Build Command**:
   ```bash
-  npm install && npm run build
+  npm install --include=dev && npm run build
   ```
 - **Start Command**:
   ```bash
