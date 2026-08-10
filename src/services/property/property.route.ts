@@ -17,7 +17,6 @@ router.post(
 
 router.get(
   "/",
-  auth,
   PropertyController.getAllProperties
 );
 
