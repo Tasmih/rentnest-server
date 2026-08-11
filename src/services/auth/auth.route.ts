@@ -5,5 +5,6 @@ const router = Router();
 
 router.post("/register", AuthController.registerUser);
 router.post("/login", AuthController.loginUser);
+router.post("/google", AuthController.googleLogin);
 
 export const AuthRoutes = router;

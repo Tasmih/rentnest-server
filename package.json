@@ -9,8 +9,6 @@
     "postinstall": "prisma generate",
     "start": "node dist/server.js"
   },
-
-
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -27,6 +25,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "google-auth-library": "^11.0.1",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0",
     "prisma": "^7.9.1",

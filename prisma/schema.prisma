@@ -66,8 +66,11 @@ model User {
   id        String     @id @default(uuid())
   name      String
   email     String     @unique
-  password  String
+  password  String?
   phone     String?
+  googleId  String?    @unique
+  avatarUrl String?
+  provider  String     @default("LOCAL")
   role      UserRole   @default(TENANT)
   status    UserStatus @default(ACTIVE)
   properties Property[]

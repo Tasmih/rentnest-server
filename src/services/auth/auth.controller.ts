@@ -40,7 +40,27 @@ const loginUser = async (
   }
 };
 
+const googleLogin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await AuthService.googleLogin(req.body);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Google login successful",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const AuthController = {
   registerUser,
   loginUser,
+  googleLogin,
 };

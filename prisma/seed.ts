@@ -38,9 +38,8 @@ async function main() {
 
 
 
-  // ==========================
+  
   // Categories
-  // ==========================
 
 
   const categoryNames = [
