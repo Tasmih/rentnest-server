@@ -83,6 +83,37 @@ async function main() {
   }
 
 
+// Admin
+
+
+const adminPassword = await bcrypt.hash(
+  "Admin@123",
+  10
+);
+
+await prisma.user.upsert({
+
+  where:{
+    email:"admin@gmail.com",
+  },
+
+  update:{},
+
+  create:{
+
+    name:"Admin",
+
+    email:"admin@gmail.com",
+
+    password:adminPassword,
+
+    phone:"01700000002",
+
+    role:"ADMIN",
+
+  },
+
+});
 
 
 
@@ -142,7 +173,31 @@ async function main() {
   });
 
 
+// Tenant
 
+const tenantPassword = await bcrypt.hash(
+  "Tenant@123",
+  10
+);
+
+const tenant =
+await prisma.user.upsert({
+
+  where:{
+    email:"tenant@gmail.com",
+  },
+
+  update:{},
+
+  create:{
+    name:"Tenant",
+    email:"tenant@gmail.com",
+    password:tenantPassword,
+    phone:"01700000001",
+    role:"TENANT",
+  },
+
+});
 
 
 
