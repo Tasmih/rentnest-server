@@ -18,6 +18,8 @@ app.use(
 // 2. Production-safe CORS Configuration
 const allowedOrigins = [
   process.env.CLIENT_URL,
+  "https://rentnest-client-three.vercel.app",
+  "https://rentnest.vercel.app",
   "http://localhost:3000",
   "http://localhost:3001",
   "http://127.0.0.1:3000",
