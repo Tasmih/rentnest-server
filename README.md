@@ -173,3 +173,4 @@ Complete details for all 30 REST endpoints, request bodies, query parameters, he
 - **Backend Repository**: [https://github.com/Tasmih/rentnest-server](https://github.com/Tasmih/rentnest-server)
 - **Frontend Repository**: [https://github.com/Tasmih/rentnest-client](https://github.com/Tasmih/rentnest-client)
 - **Live Frontend Web App**: [https://rentnest.vercel.app](https://rentnest.vercel.app)
+- **API Documentation**: [API_DOCUMENTATION.md](https://github.com/Tasmih/rentnest-server/blob/main/API_DOCUMENTATION.md)
