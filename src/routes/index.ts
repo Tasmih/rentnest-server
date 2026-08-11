@@ -10,6 +10,7 @@ import { RentalRequestRoutes } from "../services/rentalRequest/rentalRequest.rou
 import { FavoriteRoutes } from "../services/favorite/favorite.route";
 import { ReviewRoutes } from "../services/review/review.route";
 import { DashboardRoutes } from "../services/dashboard/dashboard.route";
+import { NotificationRoutes } from "../services/notification/notification.route";
 
 
 const router = Router();
@@ -57,7 +58,6 @@ router.use("/rental-requests", RentalRequestRoutes);
 router.use("/favorites", FavoriteRoutes);
 router.use("/reviews", ReviewRoutes);
 router.use("/dashboard", DashboardRoutes);
+router.use("/notifications", NotificationRoutes);
 
 export default router;
-
-

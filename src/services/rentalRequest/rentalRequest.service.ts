@@ -1,9 +1,8 @@
 import prisma from "../../lib/prisma";
 import AppError from "../../utils/AppError";
-
+import { NotificationService } from "../notification/notification.service";
 
 // Create Rental Request (Tenant)
-
 const createRentalRequest = async (
   tenantId: string,
   payload: {
@@ -12,7 +11,6 @@ const createRentalRequest = async (
     message?: string;
   }
 ) => {
-
   const property = await prisma.property.findFirst({
     where: {
       id: payload.propertyId,
@@ -21,15 +19,12 @@ const createRentalRequest = async (
     },
   });
 
-
   if (!property) {
     throw new AppError(
       404,
       "Property not found or unavailable"
     );
   }
-
-
 
   const existingRequest =
     await prisma.rentalRequest.findFirst({
@@ -40,8 +35,6 @@ const createRentalRequest = async (
       },
     });
 
-
-
   if (existingRequest) {
     throw new AppError(
       409,
@@ -49,99 +42,81 @@ const createRentalRequest = async (
     );
   }
 
-
-
-  const request =
-    await prisma.rentalRequest.create({
-
-      data: {
-        tenantId,
-        propertyId: payload.propertyId,
-        moveInDate: payload.moveInDate,
-        message: payload.message,
-      },
-
-
-      select: {
-
-        id: true,
-        moveInDate: true,
-        message: true,
-        status: true,
-        createdAt: true,
-
-
-        property: {
-          select: {
-            id: true,
-            title: true,
-            rent: true,
-          },
+  const request = await prisma.rentalRequest.create({
+    data: {
+      tenantId,
+      propertyId: payload.propertyId,
+      moveInDate: payload.moveInDate,
+      message: payload.message,
+    },
+    select: {
+      id: true,
+      moveInDate: true,
+      message: true,
+      status: true,
+      createdAt: true,
+      property: {
+        select: {
+          id: true,
+          title: true,
+          rent: true,
+          landlordId: true,
         },
-
       },
+    },
+  });
 
-    });
+  // Trigger Notifications:
+  // 1. Tenant confirmation
+  NotificationService.createNotification({
+    userId: tenantId,
+    title: "Rental Request Submitted",
+    message: `Your request for ${property.title} was submitted successfully.`,
+    type: "RENTAL_REQUEST",
+  }).catch(() => {});
 
-
+  // 2. Landlord notification
+  if (property.landlordId) {
+    NotificationService.createNotification({
+      userId: property.landlordId,
+      title: "New Rental Request Received",
+      message: `A tenant submitted a rental application for your listing: ${property.title}.`,
+      type: "RENTAL_REQUEST",
+    }).catch(() => {});
+  }
 
   return request;
-
 };
-
-
-
 
 // Tenant: My Requests
-
-const getMyRentalRequests = async (
-  tenantId: string
-) => {
-
-
-  const requests =
-    await prisma.rentalRequest.findMany({
-
-      where: {
-        tenantId,
-        isDeleted: false,
-      },
-
-
-      select: {
-
-        id: true,
-        moveInDate: true,
-        message: true,
-        status: true,
-        createdAt: true,
-
-
-        property: {
-          select: {
-            id: true,
-            title: true,
-            rent: true,
-            area: true,
-          },
+const getMyRentalRequests = async (tenantId: string) => {
+  const requests = await prisma.rentalRequest.findMany({
+    where: {
+      tenantId,
+      isDeleted: false,
+    },
+    select: {
+      id: true,
+      moveInDate: true,
+      message: true,
+      status: true,
+      createdAt: true,
+      property: {
+        select: {
+          id: true,
+          title: true,
+          rent: true,
+          area: true,
         },
-
       },
-
-
-      orderBy: {
-        createdAt: "desc",
-      },
-
-    });
-
-
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   return requests;
-
 };
-
-
 
 export const RentalRequestService = {
   createRentalRequest,
@@ -228,6 +203,7 @@ export const RentalRequestService = {
         data: { status: "ACCEPTED" },
         select: {
           id: true,
+          tenantId: true,
           moveInDate: true,
           message: true,
           status: true,
@@ -265,6 +241,14 @@ export const RentalRequestService = {
         data: { status: "REJECTED" },
       }),
     ]);
+
+    // Trigger Notification for Tenant
+    NotificationService.createNotification({
+      userId: rentalRequest.tenantId,
+      title: "Rental Request Accepted",
+      message: `Great news! Your request for ${rentalRequest.property.title} was ACCEPTED by the landlord.`,
+      type: "RENTAL_REQUEST",
+    }).catch(() => {});
 
     return updatedRequest;
   },
@@ -304,6 +288,7 @@ export const RentalRequestService = {
       data: { status: "REJECTED" },
       select: {
         id: true,
+        tenantId: true,
         moveInDate: true,
         message: true,
         status: true,
@@ -328,6 +313,14 @@ export const RentalRequestService = {
       },
     });
 
+    // Trigger Notification for Tenant
+    NotificationService.createNotification({
+      userId: rentalRequest.tenantId,
+      title: "Rental Request Declined",
+      message: `Your application for ${rentalRequest.property.title} was not accepted.`,
+      type: "RENTAL_REQUEST",
+    }).catch(() => {});
+
     return updatedRequest;
   },
-};
+};

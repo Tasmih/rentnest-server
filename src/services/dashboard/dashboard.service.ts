@@ -6,10 +6,20 @@ const getAdminDashboard = async () => {
     totalUsers,
     totalLandlords,
     totalTenants,
+    totalAdmins,
     totalProperties,
     availableProperties,
     rentedProperties,
     totalRentalRequests,
+    flatCount,
+    roomCount,
+    seatCount,
+    subletCount,
+    hostelCount,
+    pendingRequests,
+    acceptedRequests,
+    rejectedRequests,
+    recentRequests,
   ] = await Promise.all([
     prisma.user.count({
       where: { isDeleted: false },
@@ -19,6 +29,9 @@ const getAdminDashboard = async () => {
     }),
     prisma.user.count({
       where: { role: "TENANT", isDeleted: false },
+    }),
+    prisma.user.count({
+      where: { role: "ADMIN", isDeleted: false },
     }),
     prisma.property.count({
       where: { isDeleted: false },
@@ -32,16 +45,73 @@ const getAdminDashboard = async () => {
     prisma.rentalRequest.count({
       where: { isDeleted: false },
     }),
+    // Property Type Counts
+    prisma.property.count({
+      where: { propertyType: "FLAT", isDeleted: false },
+    }),
+    prisma.property.count({
+      where: { propertyType: "ROOM", isDeleted: false },
+    }),
+    prisma.property.count({
+      where: { propertyType: "SEAT", isDeleted: false },
+    }),
+    prisma.property.count({
+      where: { propertyType: "SUBLET", isDeleted: false },
+    }),
+    prisma.property.count({
+      where: { propertyType: "HOSTEL", isDeleted: false },
+    }),
+    // Rental Request Status Counts
+    prisma.rentalRequest.count({
+      where: { status: "PENDING", isDeleted: false },
+    }),
+    prisma.rentalRequest.count({
+      where: { status: "ACCEPTED", isDeleted: false },
+    }),
+    prisma.rentalRequest.count({
+      where: { status: "REJECTED", isDeleted: false },
+    }),
+    // Recent Activity
+    prisma.rentalRequest.findMany({
+      where: { isDeleted: false },
+      take: 5,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        status: true,
+        createdAt: true,
+        tenant: {
+          select: { name: true, email: true },
+        },
+        property: {
+          select: { title: true },
+        },
+      },
+    }),
   ]);
 
   return {
     totalUsers,
     totalLandlords,
     totalTenants,
+    totalAdmins,
     totalProperties,
     availableProperties,
     rentedProperties,
     totalRentalRequests,
+    propertyTypeDistribution: {
+      FLAT: flatCount,
+      ROOM: roomCount,
+      SEAT: seatCount,
+      SUBLET: subletCount,
+      HOSTEL: hostelCount,
+    },
+    requestStatusDistribution: {
+      PENDING: pendingRequests,
+      ACCEPTED: acceptedRequests,
+      REJECTED: rejectedRequests,
+    },
+    recentActivity: recentRequests,
   };
 };
 
