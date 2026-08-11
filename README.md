@@ -165,12 +165,27 @@ Complete details for all 30 REST endpoints, request bodies, query parameters, he
 
 ---
 
+## Live Backend API
+
+[https://rentnest-server-fz6q.onrender.com](https://rentnest-server-fz6q.onrender.com)
+
+
+## Live Frontend Application
+
+[https://rentnest-client-three.vercel.app](https://rentnest-client-three.vercel.app)
+
+
+## API Documentation
+
+[https://github.com/Tasmih/rentnest-server/blob/main/API_DOCUMENTATION.md](https://github.com/Tasmih/rentnest-server/blob/main/API_DOCUMENTATION.md)
+
+
 ## Deployment & Repository Information
 
 - **Live Backend API Base URL**: [https://rentnest-server-fz6q.onrender.com/api](https://rentnest-server-fz6q.onrender.com/api)
 - **Deployment Platform**: Render
-- **Database Hosting**: PostgreSQL
+- **Database Hosting**: PostgreSQL (Neon DB)
 - **Backend Repository**: [https://github.com/Tasmih/rentnest-server](https://github.com/Tasmih/rentnest-server)
 - **Frontend Repository**: [https://github.com/Tasmih/rentnest-client](https://github.com/Tasmih/rentnest-client)
-- **Live Frontend Web App**: [https://rentnest.vercel.app](https://rentnest.vercel.app)
+- **Live Frontend Web App**: [https://rentnest-client-three.vercel.app](https://rentnest-client-three.vercel.app)
 - **API Documentation**: [API_DOCUMENTATION.md](https://github.com/Tasmih/rentnest-server/blob/main/API_DOCUMENTATION.md)
