@@ -2,7 +2,6 @@ import prisma from "../../lib/prisma";
 import AppError from "../../utils/AppError";
 import { PropertyType } from "../../generated/prisma/enums";
 
-
 type TCreatePropertyPayload = {
   title: string;
   description: string;
@@ -26,14 +25,11 @@ type TCreatePropertyPayload = {
   familyAllowed?: boolean;
 };
 
-
 // Create Property
-
 const createProperty = async (
   userId: string,
   payload: TCreatePropertyPayload
 ) => {
-
   const category = await prisma.category.findFirst({
     where: {
       id: payload.categoryId,
@@ -41,18 +37,15 @@ const createProperty = async (
     },
   });
 
-
   if (!category) {
     throw new AppError(404, "Category not found");
   }
-
 
   const property = await prisma.property.create({
     data: {
       ...payload,
       landlordId: userId,
     },
-
     select: {
       id: true,
       title: true,
@@ -64,88 +57,75 @@ const createProperty = async (
       address: true,
       propertyType: true,
       status: true,
+      bedrooms: true,
+      bathrooms: true,
+      coverImage: true,
       landlordId: true,
       categoryId: true,
       createdAt: true,
     },
   });
 
-
   return property;
 };
 
-
-
 // Get All Properties with Search Filter Pagination
-
 const getAllProperties = async (query: any) => {
-
   const {
     page = "1",
     limit = "10",
     area,
+    city,
+    searchTerm,
     minRent,
     maxRent,
+    minPrice,
+    maxPrice,
     propertyType,
     categoryId,
   } = query;
 
-
   const skip = (Number(page) - 1) * Number(limit);
+  const locationQuery = area || city || searchTerm || query.query;
+  const minimumPrice = minRent || minPrice;
+  const maximumPrice = maxRent || maxPrice;
 
-
-
-  const whereCondition = {
+  const whereCondition: any = {
     isDeleted: false,
-    status: "AVAILABLE",
-
-    ...(area && {
-      area: {
-        contains: area,
-        mode: "insensitive",
-      },
-    }),
-
-
-    ...(propertyType && {
-      propertyType,
-    }),
-
-
-    ...(categoryId && {
-      categoryId,
-    }),
-
-
-    ...(minRent || maxRent
-      ? {
-          rent: {
-            ...(minRent && {
-              gte: Number(minRent),
-            }),
-
-            ...(maxRent && {
-              lte: Number(maxRent),
-            }),
-          },
-        }
-      : {}),
   };
 
+  // Case-insensitive search across area, address, and title
+  if (locationQuery && typeof locationQuery === "string" && locationQuery.trim()) {
+    whereCondition.OR = [
+      { area: { contains: locationQuery.trim(), mode: "insensitive" } },
+      { address: { contains: locationQuery.trim(), mode: "insensitive" } },
+      { title: { contains: locationQuery.trim(), mode: "insensitive" } },
+    ];
+  }
 
+  if (propertyType) {
+    whereCondition.propertyType = propertyType;
+  }
+
+  if (categoryId) {
+    whereCondition.categoryId = categoryId;
+  }
+
+  if (minimumPrice || maximumPrice) {
+    whereCondition.rent = {
+      ...(minimumPrice && { gte: Number(minimumPrice) }),
+      ...(maximumPrice && { lte: Number(maximumPrice) }),
+    };
+  }
 
   const properties = await prisma.property.findMany({
-
     where: whereCondition,
-
     skip,
-
     take: Number(limit),
-
-
     select: {
       id: true,
       title: true,
+      description: true,
       rent: true,
       serviceCharge: true,
       utilityCharge: true,
@@ -153,8 +133,11 @@ const getAllProperties = async (query: any) => {
       address: true,
       propertyType: true,
       coverImage: true,
+      bedrooms: true,
+      bathrooms: true,
       status: true,
-
+      landlordId: true,
+      createdAt: true,
       category: {
         select: {
           id: true,
@@ -162,21 +145,14 @@ const getAllProperties = async (query: any) => {
         },
       },
     },
-
-
     orderBy: {
       createdAt: "desc",
     },
-
   });
-
-
 
   const total = await prisma.property.count({
     where: whereCondition,
   });
-
-
 
   return {
     meta: {
@@ -185,26 +161,17 @@ const getAllProperties = async (query: any) => {
       total,
       totalPages: Math.ceil(total / Number(limit)),
     },
-
     data: properties,
   };
 };
 
-
-
-
 // Get Property By ID
-
 const getPropertyById = async (id: string) => {
-
   const property = await prisma.property.findFirst({
-
     where: {
       id,
       isDeleted: false,
     },
-
-
     select: {
       id: true,
       title: true,
@@ -229,16 +196,12 @@ const getPropertyById = async (id: string) => {
       status: true,
       createdAt: true,
       updatedAt: true,
-
-
       category: {
         select: {
           id: true,
           name: true,
         },
       },
-
-
       landlord: {
         select: {
           id: true,
@@ -246,26 +209,17 @@ const getPropertyById = async (id: string) => {
           phone: true,
         },
       },
-
     },
-
   });
-
-
 
   if (!property) {
     throw new AppError(404, "Property not found");
   }
 
-
   return property;
 };
 
-
-
-
 // Update Property
-
 type TUpdatePropertyPayload = {
   title?: string;
   description?: string;
@@ -288,57 +242,32 @@ type TUpdatePropertyPayload = {
   familyAllowed?: boolean;
 };
 
-
-
 const updateProperty = async (
   id: string,
   userId: string,
   role: string,
   payload: TUpdatePropertyPayload
 ) => {
-
-
   const property = await prisma.property.findFirst({
-
     where: {
       id,
       isDeleted: false,
     },
-
   });
-
-
 
   if (!property) {
     throw new AppError(404, "Property not found");
   }
 
-
-
-  if (
-    role === "LANDLORD" &&
-    property.landlordId !== userId
-  ) {
-
-    throw new AppError(
-      403,
-      "You cannot update this property"
-    );
-
+  if (role === "LANDLORD" && property.landlordId !== userId) {
+    throw new AppError(403, "You cannot update this property");
   }
 
-
-
   const updatedProperty = await prisma.property.update({
-
     where: {
       id,
     },
-
-
     data: payload,
-
-
     select: {
       id: true,
       title: true,
@@ -352,88 +281,50 @@ const updateProperty = async (
       status: true,
       updatedAt: true,
     },
-
   });
 
-
-
   return updatedProperty;
-
 };
 
-
-
-
 // Delete Property
-
 const deleteProperty = async (
   id: string,
   userId: string,
   role: string
 ) => {
-
-
   const property = await prisma.property.findFirst({
-
     where: {
       id,
       isDeleted: false,
     },
-
   });
-
-
 
   if (!property) {
     throw new AppError(404, "Property not found");
   }
 
-
-
-  if (
-    role === "LANDLORD" &&
-    property.landlordId !== userId
-  ) {
-
-    throw new AppError(
-      403,
-      "You cannot delete this property"
-    );
-
+  if (role === "LANDLORD" && property.landlordId !== userId) {
+    throw new AppError(403, "You cannot delete this property");
   }
 
-
-
   const deletedProperty = await prisma.property.update({
-
     where: {
       id,
     },
-
-
     data: {
       isDeleted: true,
       status: "INACTIVE",
     },
-
-
     select: {
       id: true,
       title: true,
       status: true,
       isDeleted: true,
     },
-
   });
 
-
-
   return deletedProperty;
-
 };
-
-
-
 
 export const PropertyService = {
   createProperty,

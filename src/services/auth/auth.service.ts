@@ -25,6 +25,14 @@ type TGoogleAuthPayload = {
   idToken?: string;
 };
 
+type TCompleteGoogleSignupPayload = {
+  name: string;
+  email: string;
+  googleId: string;
+  avatarUrl?: string;
+  role: UserRole;
+};
+
 const registerUser = async (payload: TRegisterPayload) => {
   const existingUser = await prisma.user.findUnique({
     where: {
@@ -167,16 +175,68 @@ const googleLogin = async (payload: TGoogleAuthPayload) => {
         },
       });
     }
-  } else {
-    // Create new Google user
+
+    const token = JwtUtils.createToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    return {
+      requiresRoleSelection: false,
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        status: user.status,
+        avatarUrl: user.avatarUrl,
+      },
+    };
+  }
+
+  // User does NOT exist: Return Google data to trigger role selection UI on frontend
+  return {
+    requiresRoleSelection: true,
+    googleData: {
+      name: name || "Google User",
+      email,
+      googleId,
+      avatarUrl: picture,
+    },
+  };
+};
+
+const completeGoogleSignup = async (payload: TCompleteGoogleSignupPayload) => {
+  if (!payload.email || !payload.googleId || !payload.role) {
+    throw new AppError(400, "Email, googleId, and role are required");
+  }
+
+  if (payload.role === UserRole.ADMIN) {
+    throw new AppError(
+      403,
+      "Admin account cannot be created through Google registration"
+    );
+  }
+
+  // Check if user already exists
+  let user = await prisma.user.findFirst({
+    where: {
+      OR: [{ email: payload.email }, { googleId: payload.googleId }],
+    },
+  });
+
+  if (!user) {
     user = await prisma.user.create({
       data: {
-        name: name || "Google User",
-        email,
-        googleId,
-        avatarUrl: picture,
+        name: payload.name || "Google User",
+        email: payload.email,
+        googleId: payload.googleId,
+        avatarUrl: payload.avatarUrl,
         provider: "GOOGLE",
-        role: UserRole.TENANT,
+        role: payload.role,
         status: "ACTIVE",
       },
     });
@@ -206,4 +266,5 @@ export const AuthService = {
   registerUser,
   loginUser,
   googleLogin,
+  completeGoogleSignup,
 };

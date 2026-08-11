@@ -6,7 +6,13 @@ import notFound from "./middleware/notFound";
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 app.use("/api", routes);
 
@@ -21,6 +27,5 @@ app.get("/", (req, res) => {
 app.use(notFound);
 
 app.use(globalErrorHandler);
-
 
 export default app;
