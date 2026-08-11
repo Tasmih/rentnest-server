@@ -37,6 +37,36 @@ The platform provides granular, role-based functionality tailored to three core 
 
 ---
 
+## JWT Authentication Header
+
+All protected API endpoints require a valid JSON Web Token (JWT) sent in the HTTP request headers using the standard `Bearer` authentication scheme:
+
+```http
+Authorization: Bearer <jwt_token>
+```
+
+- Tokens are generated upon successful login (`POST /api/auth/login` or `POST /api/auth/google`) and contain user identity (`id`, `email`, `role`).
+- Unauthenticated requests to protected endpoints return `401 Unauthorized`.
+- Requests lacking required role permissions return `403 Forbidden`.
+
+---
+
+## Database Models Overview
+
+The database is built on PostgreSQL using Prisma ORM with soft delete support (`isDeleted = true`):
+
+| Model | Table | Description & Relations | Key Enums |
+| :--- | :--- | :--- | :--- |
+| **`User`** | `users` | User accounts (Tenants, Landlords, Admins). Has many properties, requests, reviews, favorites, and notifications. | `UserRole` (`TENANT`, `LANDLORD`, `ADMIN`), `UserStatus` (`ACTIVE`, `BLOCKED`, `INACTIVE`) |
+| **`Category`** | `categories` | Property categories (e.g. Apartments, Rooms). Has many properties. | `CategoryStatus` (`ACTIVE`, `INACTIVE`) |
+| **`Property`** | `properties` | Rental listings with rent, area, amenities, landlord ID, and category ID. | `PropertyType` (`FLAT`, `ROOM`, `SEAT`, `SUBLET`, `HOSTEL`), `PropertyStatus` (`AVAILABLE`, `RESERVED`, `RENTED`, `INACTIVE`) |
+| **`RentalRequest`** | `rental_requests` | Rental applications connecting Tenants and Properties. | `RequestStatus` (`PENDING`, `ACCEPTED`, `REJECTED`, `CANCELLED`) |
+| **`Review`** | `reviews` | Ratings (1–5) and review comments per property by tenants. | `ReviewStatus` (`PUBLISHED`, `HIDDEN`) |
+| **`Favorite`** | `favorites` | Saved property wishlist per user. | `FavoriteStatus` (`ACTIVE`, `REMOVED`) |
+| **`Notification`** | `notifications` | In-app alerts and request status updates for users. | `type`: `INFO`, `RENTAL_REQUEST` |
+
+---
+
 ## Project Structure
 
 ```text
@@ -130,13 +160,16 @@ npm start
 
 ## API Documentation
 
-Complete details for all endpoints, request bodies, query parameters, headers, and status codes are documented in:
-👉 **[API_DOCUMENTATION.md](file:///c:/project/RentNest/rentnest-server/API_DOCUMENTATION.md)**
+Complete details for all 30 REST endpoints, request bodies, query parameters, headers, and status codes are documented in:
+👉 **[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)** (View online on [GitHub](https://github.com/Tasmih/rentnest-server/blob/main/API_DOCUMENTATION.md))
 
 ---
 
-## Deployment
+## Deployment & Repository Information
 
-- **Live Backend API Base URL**: [https://rentnest-server.onrender.com/api](https://rentnest-server.onrender.com/api)
+- **Live Backend API Base URL**: [https://rentnest-server-fz6q.onrender.com/api](https://rentnest-server-fz6q.onrender.com/api)
 - **Deployment Platform**: Render
 - **Database Hosting**: PostgreSQL
+- **Backend Repository**: [https://github.com/Tasmih/rentnest-server](https://github.com/Tasmih/rentnest-server)
+- **Frontend Repository**: [https://github.com/Tasmih/rentnest-client](https://github.com/Tasmih/rentnest-client)
+- **Live Frontend Web App**: [https://rentnest.vercel.app](https://rentnest.vercel.app)
